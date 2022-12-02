@@ -1,0 +1,7 @@
+*.bak
+__pycache__/
+*.exe
+*.spec
+*.manifest
+**/__pycache__/
+*.json
