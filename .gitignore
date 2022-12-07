@@ -4,3 +4,4 @@ __pycache__/
 *.spec
 *.manifest
 **/__pycache__/
+*.log

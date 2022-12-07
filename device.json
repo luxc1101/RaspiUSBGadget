@@ -1,6 +1,6 @@
 {
     "ECM": {
-        "Device_sup": [
+        "0": [
             {"dev": "D-Link DUB-E100 big", "VID": "0x2001", "PID": "0x3C05"},
             {"dev": "D-Link DUB-E100 small", "VID": "0x2001", "PID": "0x1A02"},
             {"dev": "Edimax EU-4207 big", "VID": "0x0B95", "PID" : "0x7720"},
@@ -11,28 +11,31 @@
             {"dev": "D-Link DUB-1312", "VID": "0x2001", "PID" : "0x4A00"},
             {"dev": "LogiLink UA0144B", "VID": "0x0BDA", "PID" : "0x8152"}
         ],
-        "Device_unsup": [
+        "1": [
             {"dev": "unbekannt Ethernet Adapter", "VID": "0x0525","PID": "0xA4AC"}
         ]
     },
     "HID": {
-        "Device_sup": [],
-        "Device_unsup": [
+        "0": [
+            {"dev": "Keyboard", "VID": "0x413C", "PID": "0x2113"}
+        ],
+        "1": [
             {"dev": "Keyboard", "VID": "0x413C", "PID": "0x2113"}
         ]
     },
     "AOAP": {
-        "Device_sup": [
+        "0": [
             {"dev": "AOAP", "VID": "0x18D1", "PID": "0x2D00"},
             {"dev": "AOAP & ADB", "VID": "0x18D1", "PID": "0x2D01"},
             {"dev": "AOAP V2", "VID": "0x18D1", "PID": "0x2D04"},
             {"dev": "AOAP V2 & ADB", "VID": "0x18D1", "PID": "0x2d05"}
         ],
-        "Device_unsup": []
+        "1": []
     },
     "ETC": {
-        "Device_sup": [
+        "0": [
             {"dev": "ETC Card Reader", "VID": "0x1145", "PID": "0x0008"}
-        ]
+        ],
+        "1": []
     }
 }
