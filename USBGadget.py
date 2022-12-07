@@ -51,9 +51,13 @@ numdev = {}
 ## menu
 # read the device.json file and fill it
 def menu(file):
-    # def esc():
-    #     if msvcrt.getch() == chr(27):
-    #         aborted = True  
+    '''
+    user menu
+    root: list all emulatable device (read from json files)
+    secondlayer: 0 supported devices 1 unsupported devices
+    thirdlayer: list all 0 devices or 1 devieces
+    fourthlayer: list the final selected device
+    '''
     def Input(str):
         print(str)
         key = msvcrt.getch().decode('ASCII')
@@ -62,12 +66,12 @@ def menu(file):
     
     def root():
         ## showing device type (root)
-        print(Cyan + "all emulatable deive wie following: " + C_off)
+        print(Cyan + "all emulatable deivce wie following: " + C_off)
         for id, key in enumerate(device_dict.keys()):
             print('{}: {}'.format(id, key))
             # emulatable device dict
             numdev[str(id)] = key
-        return numdev
+        return numdev # Input 0
 
     def secondlayer(Input0):
         global Input1 
@@ -106,70 +110,31 @@ def menu(file):
             else:
                 for id, dev in enumerate(device_dict[numdev[Input1]][Input2]):
                     if str(id) == str(Input3):
-                        print(str(id) + '. ' +  dev["dev"] + ':' + ' ' + dev["VID"] + ' ' +  dev["PID"])
+                        DEV = dev["dev"]
+                        VID = dev["VID"]
+                        PID = dev["PID"]
+                        print("{}. {}:  {} {}".format(str(id), DEV, VID, PID))
                         print("r: return")
+                        # Gadget
+                        Gadgets(DEV=DEV, VID=VID, PID=PID)
                         break
                 return fourthlayer(Input2)
         except: 
             return fourthlayer(Input2)
-
+    # open and read device json data base
     with open(os.path.join(os.getcwd(), file), 'r', encoding="utf-8") as f:
         device_dict = json.load(f)
         f.close()
 
     # root()
-    # Output1 = secondlayer(root())
     fourthlayer(thirdlayer(secondlayer(root())))
-    # try:
-    #     for key in device_dict[numdev[Input1]].keys():
-    #         if key == "0":
-    #             print('{}: supported'.format(key))
-    #         if key == "1":
-    #             print('{}: unsupported'.format(key))
-    #     print("r: return")
-    # except:
-    #     Input1
-    ## Input 0 or 1 or return
-    # Input2 = Input(str = Cyan + "Supported (0) or Unsupported (1) : " + C_off)
-    # # Input2 = input(Cyan + "{}".format(msvcrt.getch().decode('ASCII')) + C_off)
-    # ## showing all supported or unsupported devices root/sup or usup/devs
-    # for id, dev in zip(range(0,len(device_dict[Input1][Input2])),device_dict[Input1][Input2]):
-    #     print(str(id) + '. ' +  dev["dev"] + ':' + ' ' + dev["VID"] + ' ' +  dev["PID"])
-    # print("ESC")
-    # ## Input selected deive
-    # print(Cyan + "Enter the device number: " + C_off)
-    # Input3 = msvcrt.getch().decode('ASCII')
-    # ## showing selected deivce root/sup or usup/devs/dev
-    # for id, dev in enumerate(device_dict[Input1][Input2]):
-    #     if str(id) == str(Input3):
-    #         print(str(id) + '. ' +  dev["dev"] + ':' + ' ' + dev["VID"] + ' ' +  dev["PID"])
-    #         break
-
-
-    # print(len(device_dict))
-    # for keys, values in device_dict.items():
-    #     print(keys)
-    #     for key, devs in values.items():
-    #         print(key)
-    #         for dev in devs:
-    #             devname = dev["dev"]
-    #             VID = dev["VID"]
-    #             PID = dev["PID"]
-    #             print(devname + ':' + ' ' +VID + ' ' +  PID)
             
-        
-
-
-
-
-
-
-'''
-Requirements
-ConfigFs must be avaiable, if it not avaiable it needs to be mounted firstly
-modules and device tree also
-'''
 def reqcheck():
+    '''
+    Requirements
+    ConfigFs must be avaiable, if it not avaiable it needs to be mounted firstly
+    modules and device tree also
+    '''
     cmdfindmnt = "findmnt | grep 'configfs'"
     status = True
     mount_OK = Popen(cmdfindmnt, shell=True, stdout=PIPE, stderr=stdolog).communicate()[0].decode('utf-8')
@@ -205,11 +170,25 @@ def reqcheck():
         return reqcheck()
     sys.stdout.write("Checking modules: {} {} \n".format('libcomposite', 'dwc2'))
 
+def Gadgets(DEV, VID, PID):
+    '''
+    Creating the Gadgets
+    '''
+    print('going to emulate {} device'.format(DEV))
+    Popen('cd /sys/kernel/config/usb_gadget/ && sudo mkdir -p g1 && cd g1 # e.g. g1', shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo bash -c 'echo {} > idVendor'".format(VID), shell=True, stdout=stdolog, stderr=stdolog)    
+    Popen("sudo bash -c 'echo {} > idProduct'".format(PID), shell=True, stdout=stdolog, stderr=stdolog)    
+    Popen("sudo bash -c 'echo '0xEF' > bDeviceClass'", shell=True, stdout=stdolog, stderr=stdolog)    
+    Popen("sudo bash -c 'echo '0x02' > bDeviceSubClass'", shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo bash -c 'echo '0x01' > bDeviceProtocol'", shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo mkdir -p strings/0x409", shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo bash -c 'echo fedcba9876543210 > strings/0x409/serialnumber'", shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo bash -c 'echo SWTE Media > strings/0x409/manufacturer'", shell=True, stdout=stdolog, stderr=stdolog)
+    Popen("sudo bash -c 'echo SWTE USB Device > strings/0x409/product'", shell=True, stdout=stdolog, stderr=stdolog)
 
-'''
-Creating the Gadgets
-'''    
-    
+
+  
+
     
     
 if __name__ == "__main__":
