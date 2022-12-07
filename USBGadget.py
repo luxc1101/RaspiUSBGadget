@@ -22,7 +22,8 @@ be emulated by using the Raspi USB gadget.
 # Import all needed libs #
 ##########################
 import json
-import msvcrt
+import msvcrt # windows
+# import getch # linux
 import os
 import sys
 from subprocess import PIPE, Popen, check_output, run
@@ -60,7 +61,8 @@ def menu(file):
     '''
     def Input(str):
         print(str)
-        key = msvcrt.getch().decode('ASCII')
+        key = msvcrt.getch().decode('ASCII')# windows
+        # key = getch.getch() # linux
         print(Green + key + C_off)
         return key
     
@@ -116,7 +118,9 @@ def menu(file):
                         print("{}. {}:  {} {}".format(str(id), DEV, VID, PID))
                         print("r: return")
                         # Gadget
+                        print('>'*60)
                         Gadgets(DEV=DEV, VID=VID, PID=PID)
+                        print('<'*60)
                         break
                 return fourthlayer(Input2)
         except: 
@@ -174,17 +178,18 @@ def Gadgets(DEV, VID, PID):
     '''
     Creating the Gadgets
     '''
+    root = "/sys/kernel/config/usb_gadget/g1"
     print('going to emulate {} device'.format(DEV))
-    Popen('cd /sys/kernel/config/usb_gadget/ && sudo mkdir -p g1 && cd g1 # e.g. g1', shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo bash -c 'echo {} > idVendor'".format(VID), shell=True, stdout=stdolog, stderr=stdolog)    
-    Popen("sudo bash -c 'echo {} > idProduct'".format(PID), shell=True, stdout=stdolog, stderr=stdolog)    
-    Popen("sudo bash -c 'echo '0xEF' > bDeviceClass'", shell=True, stdout=stdolog, stderr=stdolog)    
-    Popen("sudo bash -c 'echo '0x02' > bDeviceSubClass'", shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo bash -c 'echo '0x01' > bDeviceProtocol'", shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo mkdir -p strings/0x409", shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo bash -c 'echo fedcba9876543210 > strings/0x409/serialnumber'", shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo bash -c 'echo SWTE Media > strings/0x409/manufacturer'", shell=True, stdout=stdolog, stderr=stdolog)
-    Popen("sudo bash -c 'echo SWTE USB Device > strings/0x409/product'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen('cd /sys/kernel/config/usb_gadget/ && sudo mkdir -p g1 && cd g1', shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo {} > {}/idVendor'".format(VID, root), shell=True, stdout=stdolog, stderr=stdolog)    
+    # Popen("sudo bash -c 'echo {} > {}/idProduct'".format(PID, root), shell=True, stdout=stdolog, stderr=stdolog)    
+    # Popen("sudo bash -c 'echo '0xEF' > bDeviceClass'", shell=True, stdout=stdolog, stderr=stdolog)    
+    # Popen("sudo bash -c 'echo '0x02' > bDeviceSubClass'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo '0x01' > bDeviceProtocol'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo mkdir -p strings/0x409", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo fedcba9876543210 > strings/0x409/serialnumber'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo SWTE Media > strings/0x409/manufacturer'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo SWTE USB Device > strings/0x409/product'", shell=True, stdout=stdolog, stderr=stdolog)
 
 
   
