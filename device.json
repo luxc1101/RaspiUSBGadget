@@ -13,7 +13,11 @@
         ],
         "1": [
             {"dev": "unbekannt Ethernet Adapter", "VID": "0x0525","PID": "0xA4AC"}
-        ]
+        ],
+        "type": {
+            "func": "ecm.usb0"
+        }
+
     },
     "HID": {
         "0": [
@@ -21,7 +25,10 @@
         ],
         "1": [
             {"dev": "Keyboard", "VID": "0x413C", "PID": "0x2113"}
-        ]
+        ],
+        "type": {
+            "func": "hid.usb0"
+        }
     },
     "AOAP": {
         "0": [
@@ -30,12 +37,36 @@
             {"dev": "AOAP V2", "VID": "0x18D1", "PID": "0x2D04"},
             {"dev": "AOAP V2 & ADB", "VID": "0x18D1", "PID": "0x2d05"}
         ],
-        "1": []
+        "1": [],
+        "type": {
+            "func": "mass_storage.usb0"
+        }
     },
     "ETC": {
         "0": [
             {"dev": "ETC Card Reader", "VID": "0x1145", "PID": "0x0008"}
         ],
-        "1": []
+        "1": [],
+        "type": {
+            "func": "mass_storage.usb0"
+        }
+
+    },
+    "TEST": {
+        "0": [
+            {"dev": "TEST_SE0_NAK", "VID": "0x1a0a", "PID": "0x0101"},
+            {"dev": "TEST_J", "VID": "0x1a0a", "PID": "0x0102"},
+            {"dev": "TEST_K", "VID": "0x1a0a", "PID": "0x0103"},
+            {"dev": "TEST_PACKET", "VID": "0x1a0a", "PID": "0x0104"},
+            {"dev": "TEST_SUSPEND_RESUME", "VID": "0x1a0a", "PID": "0x0106"},
+            {"dev": "TEST_GET_DEVICE_DESC", "VID": "0x1a0a", "PID": "0x0107"},
+            {"dev": "TEST_GET_DEVICE_DESC_DATA", "VID": "0x1a0a", "PID": "0x0108"},
+            {"dev": "TEST_DEVICE", "VID": "0x1a0a", "PID": "0x0200"}
+        ],
+        "1": [],
+        "type": {
+            "func": "mass_storage.usb0"
+        }
     }
+
 }

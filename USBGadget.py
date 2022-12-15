@@ -22,7 +22,7 @@ be emulated by using the Raspi USB gadget.
 # Import all needed libs #
 ##########################
 import json
-import msvcrt # windows
+import msvcrt  # windows
 # import getch # linux
 import os
 import sys
@@ -77,6 +77,7 @@ def menu(file):
 
     def secondlayer(Input0):
         global Input1 
+        global Func
         Input1 = Input(str = Cyan + "Enter the device type or : " + C_off)
         try:
             for key in device_dict[Input0[Input1]].keys():
@@ -84,6 +85,8 @@ def menu(file):
                     print('{}: supported'.format(key))
                 if key == "1":
                     print('{}: unsupported'.format(key))
+                if key == "type":
+                    Func = device_dict[Input0[Input1]][key]["func"]
             print("r: return")
             return Input1 
         except:
@@ -118,9 +121,11 @@ def menu(file):
                         print("{}. {}:  {} {}".format(str(id), DEV, VID, PID))
                         print("r: return")
                         # Gadget
+                        #######################################################
                         print('>'*60)
-                        Gadgets(DEV=DEV, VID=VID, PID=PID)
+                        Gadgets(DEV=DEV, VID=VID, PID=PID, func = Func)
                         print('<'*60)
+                        #######################################################
                         break
                 return fourthlayer(Input2)
         except: 
@@ -174,22 +179,42 @@ def reqcheck():
         return reqcheck()
     sys.stdout.write("Checking modules: {} {} \n".format('libcomposite', 'dwc2'))
 
-def Gadgets(DEV, VID, PID):
+def Gadgets(DEV, VID, PID, func):
     '''
     Creating the Gadgets
     '''
-    root = "/sys/kernel/config/usb_gadget/g1"
+    root = " "
     print('going to emulate {} device'.format(DEV))
+    udcname = ''
+    print(func + ' ' + VID + ' ' + PID)
+
+    '''
+    try disabling the Gadget except pass
+    firstly check if configuration folder eixited 
+    ja -> 
+
+    ''' 
+    Popen('sudo bash -c "echo {} > {}/UDC" || echo pass'.format(udcname, root), shell=True, stdout=stdolog, stderr=stdolog)
+
+    # try:
+
+    #     pass
+    # except:
+        # pass
+
+
+
     # Popen('cd /sys/kernel/config/usb_gadget/ && sudo mkdir -p g1 && cd g1', shell=True, stdout=stdolog, stderr=stdolog)
     # Popen("sudo bash -c 'echo {} > {}/idVendor'".format(VID, root), shell=True, stdout=stdolog, stderr=stdolog)    
     # Popen("sudo bash -c 'echo {} > {}/idProduct'".format(PID, root), shell=True, stdout=stdolog, stderr=stdolog)    
-    # Popen("sudo bash -c 'echo '0xEF' > bDeviceClass'", shell=True, stdout=stdolog, stderr=stdolog)    
-    # Popen("sudo bash -c 'echo '0x02' > bDeviceSubClass'", shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo '0x01' > bDeviceProtocol'", shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo mkdir -p strings/0x409", shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo fedcba9876543210 > strings/0x409/serialnumber'", shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo SWTE Media > strings/0x409/manufacturer'", shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo SWTE USB Device > strings/0x409/product'", shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo '0xEF' > {}/bDeviceClass'".format(root), shell=True, stdout=stdolog, stderr=stdolog)    
+    # Popen("sudo bash -c 'echo '0x02' > {}/bDeviceSubClass'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo '0x01' > {}/bDeviceProtocol'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo mkdir -p {}/strings/0x409".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo fedcba9876543210 > {}/strings/0x409/serialnumber'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo SWTE Media > {}/strings/0x409/manufacturer'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+    # Popen("sudo bash -c 'echo SWTE USB Device > {}/strings/0x409/product'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
+
 
 
   
