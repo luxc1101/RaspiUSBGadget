@@ -67,28 +67,33 @@ def menu(file):
         return key
     
     def root():
-        ## showing device type (root)
-        print(Cyan + "all emulatable deivce wie following: " + C_off)
-        for id, key in enumerate(device_dict.keys()):
-            print('{}: {}'.format(id, key))
-            # emulatable device dict
-            numdev[str(id)] = key
-        return numdev # Input 0
+        try:
+            ## showing device type (root)
+            print(Cyan + "all emulatable deivce wie following: " + C_off)
+            for id, key in enumerate(device_dict.keys()):
+                print('{}: {}'.format(id, key))
+                # emulatable device dict
+                numdev[str(id)] = key
+            return numdev # Input 0
+        except KeyboardInterrupt as e:
+            print(e)
 
     def secondlayer(Input0):
         global Input1 
         global Func
-        Input1 = Input(str = Cyan + "Enter the device type or : " + C_off)
+        Input1 = Input(str = Cyan + "Enter the device type: " + C_off)
         try:
-            for key in device_dict[Input0[Input1]].keys():
-                if key == "0":
-                    print('{}: supported'.format(key))
-                if key == "1":
-                    print('{}: unsupported'.format(key))
-                if key == "type":
-                    Func = device_dict[Input0[Input1]][key]["func"]
-            print("r: return")
-            return Input1 
+            if Input1 == 'q':
+                return
+            else:
+                for key in device_dict[Input0[Input1]].keys():
+                    if key == "0":
+                        print('{}: supported'.format(key))
+                    if key == "1":
+                        print('{}: unsupported'.format(key))
+                    if key == "type":
+                        Func = device_dict[Input0[Input1]][key]["func"]
+                return Input1 
         except:
             secondlayer(Input0)
 
@@ -98,6 +103,8 @@ def menu(file):
         try:
             if Input2 == "r":
                return thirdlayer(secondlayer(root()))
+            elif Input2 == 'q':
+                return
             else: 
                 for id, dev in enumerate(device_dict[numdev[Input1]][Input2]):
                     print(str(id) + '. ' +  dev["dev"] + ':' + ' ' + dev["VID"] + ' ' +  dev["PID"])
@@ -112,6 +119,8 @@ def menu(file):
         try:
             if Input3 == "r":
                 return fourthlayer(thirdlayer(Input1))
+            elif Input3 == 'q':
+                return
             else:
                 for id, dev in enumerate(device_dict[numdev[Input1]][Input2]):
                     if str(id) == str(Input3):
@@ -123,7 +132,7 @@ def menu(file):
                         # Gadget
                         #######################################################
                         print('>'*60)
-                        Gadgets(DEV=DEV, VID=VID, PID=PID, func = Func)
+                        Gadgets(DEV=DEV, VID=VID, PID=PID, FUNC = Func)
                         print('<'*60)
                         #######################################################
                         break
@@ -179,22 +188,45 @@ def reqcheck():
         return reqcheck()
     sys.stdout.write("Checking modules: {} {} \n".format('libcomposite', 'dwc2'))
 
-def Gadgets(DEV, VID, PID, func):
+def Gadgets(DEV, VID, PID, FUNC):
     '''
     Creating the Gadgets
     '''
-    root = " "
+    root = "/sys/kernel/config/usb_gadget"
     print('going to emulate {} device'.format(DEV))
     udcname = ''
-    print(func + ' ' + VID + ' ' + PID)
+    print(FUNC + ' ' + VID + ' ' + PID)
 
     '''
     try disabling the Gadget except pass
-    firstly check if configuration folder eixited 
-    ja -> 
+    firstly check if function in configuration folder eixited 
+    ja -> remove it
 
     ''' 
-    Popen('sudo bash -c "echo {} > {}/UDC" || echo pass'.format(udcname, root), shell=True, stdout=stdolog, stderr=stdolog)
+
+    if os.path.exists("{}/g1/UDC".format(root)):
+        catUDC = check_output('cat {}/g1/UDC'.format(root), shell=True, encoding='utf-8').split('\n')[0]                                # cat the content of UDC 
+        if 'usb' in catUDC:                                                                                                             # if usb in UDC
+            Popen('sudo bash -c "echo {} > {}/g1/UDC" || echo pass'.format(udcname, root), shell=True, stdout=stdolog, stderr=stdolog)  # disable the Gadget
+
+    if os.path.exists("{}/g1/configs/c.1".format(root)):
+        funcname = check_output('ls {}/g1/configs/c.1 | grep usb0 || echo pass'.format(root), shell=True, encoding='utf-8').split('\n')[0] # get the symlink name
+        if "usb0" in funcname:
+            Popen('sudo rm {}/g1/configs/c.1/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)           # remove the sysmlink
+            Popen('sudo rmdir {}/g1/configs/c.1/strings/0x409'.format(root), shell=True, stdout=stdolog, stderr=stdolog)       # remove the string dir in the configuations
+            Popen('sudo rmdir {}/g1/configs/c.1'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                     # remove the configurations
+            Popen('sudo rmdir {}/g1/functions/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)          # remove the functions
+            Popen('sudo rmdir {}/g1/strings/0x409'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # remove the string dir in gadget
+            Popen('sudo rmdir {}/g1'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                                 # remove the string dir in gadget
+
+
+
+
+
+      
+
+
+
 
     # try:
 
