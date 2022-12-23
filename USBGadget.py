@@ -193,8 +193,9 @@ def Gadgets(DEV, VID, PID, FUNC):
     Creating the Gadgets
     '''
     root = "/sys/kernel/config/usb_gadget"
-    print('going to emulate {} device'.format(DEV))
     udcname = ''
+    bcdDevice = '0x0100'
+    print('going to emulate {} device'.format(DEV))
     print(FUNC + ' ' + VID + ' ' + PID)
 
     '''
@@ -219,9 +220,10 @@ def Gadgets(DEV, VID, PID, FUNC):
             Popen('sudo rmdir {}/g1/strings/0x409'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # remove the string dir in gadget
             Popen('sudo rmdir {}/g1'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                                 # remove the string dir in gadget
 
-
-
-
+    Popen("sudo mkdir -p {}/g1".format(root), shell=True, stdout=stdolog, stderr=stdolog)                                       # For gadget its corresponding directory to be created
+    Popen("sudo bash -c 'echo {} > {}/g1/idVendor'".format(VID, root), shell=True, stdout=stdolog, stderr=stdolog)              # Hex vendor ID, assigned by USB Group      
+    Popen("sudo bash -c 'echo {} > {}/g1/idProduct'".format(PID, root), shell=True, stdout=stdolog, stderr=stdolog)             # Hex Product ID, assigned by USB Group 
+    Popen("sudo bash -c 'echo {} > {}/g1/bcdDevice'".format(bcdDevice, root), shell=True, stdout=stdolog, stderr=stdolog)             # Hex Product ID, assigned by USB Group 
 
       
 
