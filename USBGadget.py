@@ -32,11 +32,11 @@ from subprocess import PIPE, Popen, check_output, run
 #       Paramters        #
 ##########################n
 # color
-Cyan = '\033[1;96m'
-Yellow = '\033[1;93m'
-Green = '\033[1;92m'
-Red = '\033[1;91m'
-C_off = '\033[0m'
+Cyan    = '\033[1;96m'
+Yellow  = '\033[1;93m'
+Green   = '\033[1;92m'
+Red     = '\033[1;91m'
+C_off   = '\033[0m'
 # logging
 # create stdolog file
 logfile = "Gadget.log"
@@ -45,7 +45,7 @@ stdolog = open(os.path.join(os.getcwd(),logfile), 'a')
 stdolog = open(os.path.join(os.getcwd(),logfile), 'w')
 # cd RaspiUSBGadget && sudo rm USBGadget.py && sudo nano USBGadget.py
 global numdev 
-numdev = {}
+numdev  = {}
 ##########################
 #       Functions        #
 ##########################
@@ -132,7 +132,7 @@ def menu(file):
                         # Gadget
                         #######################################################
                         print('>'*60)
-                        Gadgets(DEV=DEV, VID=VID, PID=PID, FUNC = Func)
+                        # Gadgets(DEV=DEV, VID=VID, PID=PID, FUNC = Func)
                         print('<'*60)
                         #######################################################
                         break
@@ -191,19 +191,26 @@ def reqcheck():
 def Gadgets(DEV, VID, PID, FUNC):
     '''
     Creating the Gadgets
-    '''
-    root = "/sys/kernel/config/usb_gadget"
-    udcname = ''
-    bcdDevice = '0x0100'
-    print('going to emulate {} device'.format(DEV))
-    print(FUNC + ' ' + VID + ' ' + PID)
-
-    '''
+    
     try disabling the Gadget except pass
     firstly check if function in configuration folder eixited 
     ja -> remove it
+    '''
+    root            = "/sys/kernel/config/usb_gadget"
+    udcname         = ''
+    bcdDevice       = '0x0100'                          # Device release number
+    bcdUSB          = '0x0200'                          # Initialize this descriptor to the usb version that the device supportes (accceptatble version are 0x0110 0x0200 0x0300 0x0310)
+    bDeviceClass    = '0xEF'                            # The class code indicating the behavior of this device. 
+    bDeviceSubClass = '0x02'                            # The subclass code that further defines the behavior of this device.
+    bDeviceProtocol = '0x01'                            # The protocol that the device supports.
+    serialnumber    = 'fedcba9876543210'                # Device serial number
+    manufacturer    = 'SWTE Media'                      # Manufacturer attribute
+    product         = 'SWTE Emulated multi USB Device'  # Cleartext product description
+    configuration   = 'Config 1'                        # Name of this configuration
+    MaxPower        = '250'                             # max power this configuration can consume in mA
+    print('going to emulate {} device'.format(DEV))
+    print(FUNC + ' ' + VID + ' ' + PID)
 
-    ''' 
 
     if os.path.exists("{}/g1/UDC".format(root)):
         catUDC = check_output('cat {}/g1/UDC'.format(root), shell=True, encoding='utf-8').split('\n')[0]                                # cat the content of UDC 
@@ -219,14 +226,26 @@ def Gadgets(DEV, VID, PID, FUNC):
             Popen('sudo rmdir {}/g1/functions/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)          # remove the functions
             Popen('sudo rmdir {}/g1/strings/0x409'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # remove the string dir in gadget
             Popen('sudo rmdir {}/g1'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                                 # remove the string dir in gadget
-
+    
+    # creating the gadget
     Popen("sudo mkdir -p {}/g1".format(root), shell=True, stdout=stdolog, stderr=stdolog)                                       # For gadget its corresponding directory to be created
     Popen("sudo bash -c 'echo {} > {}/g1/idVendor'".format(VID, root), shell=True, stdout=stdolog, stderr=stdolog)              # Hex vendor ID, assigned by USB Group      
     Popen("sudo bash -c 'echo {} > {}/g1/idProduct'".format(PID, root), shell=True, stdout=stdolog, stderr=stdolog)             # Hex Product ID, assigned by USB Group 
     Popen("sudo bash -c 'echo {} > {}/g1/bcdDevice'".format(bcdDevice, root), shell=True, stdout=stdolog, stderr=stdolog)             # Hex Product ID, assigned by USB Group 
+    Popen("sudo bash -c 'echo {} > {}/g1/bcdUSB'".format(bcdUSB, root), shell=True, stdout=stdolog, stderr=stdolog)             
+    Popen("sudo bash -c 'echo {} > {}/g1/bDeviceClass'".format(bDeviceClass, root), shell=True, stdout=stdolog, stderr=stdolog)   
+    Popen("sudo bash -c 'echo {} > {}/g1/bDeviceSubClass'".format(bDeviceSubClass, root), shell=True, stdout=stdolog, stderr=stdolog)            
+    Popen("sudo bash -c 'echo {} > {}/g1/bDeviceProtocol'".format(bDeviceProtocol, root), shell=True, stdout=stdolog, stderr=stdolog)            
+    Popen("sudo mkdir -p {}/g1/strings/0x409".format(root), shell= True, stdout=stdolog, stderr=stdolog)                   # setup standard device attribute strings LANGID 0x409: US-Eng
+    Popen("sudo bash -c 'echo {} > {}/g1/strings/0x409/serialnumber'".format(serialnumber, root), shell= True, stdout=stdolog, stderr=stdolog) 
+    Popen("sudo bash -c 'echo {} > {}/g1/strings/0x409/manufacturer'".format(manufacturer, root), shell= True, stdout=stdolog, stderr=stdolog)                  
+    Popen("sudo bash -c 'echo {} > {}/g1/strings/0x409/product'".format(product, root), shell= True, stdout=stdolog, stderr=stdolog)                   
 
-      
-
+    # creating the configurations
+    Popen("sudo mkdir -p {}/g1/configs/c.1".format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # make the skeleton for a config for this gadget
+    Popen("sudo mkdir -p {}/g1/configs/c.1/strings/0x409".format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # This group contains subdirectories for language-specific strings for this configuration
+    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/strings/0x409/configuration'".format(configuration,root), shell=True, stdout=stdolog, stderr=stdolog)                 
+    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/MaxPower'".format(MaxPower,root), shell=True, stdout=stdolog, stderr=stdolog)                  
 
 
 
