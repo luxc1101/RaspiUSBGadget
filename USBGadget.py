@@ -208,6 +208,7 @@ def Gadgets(DEV, VID, PID, FUNC):
     product         = 'SWTE Emulated multi USB Device'  # Cleartext product description
     configuration   = 'Config 1'                        # Name of this configuration
     MaxPower        = '250'                             # max power this configuration can consume in mA
+    bmAttributes    = '0x80'                            # Configuration characteristics (D7: Reserved (set to one), D6: Self-powered, D5: Remote Wakeup, D4...0: Reserved (reset to zero)) 
     print('going to emulate {} device'.format(DEV))
     print(FUNC + ' ' + VID + ' ' + PID)
 
@@ -244,8 +245,12 @@ def Gadgets(DEV, VID, PID, FUNC):
     # creating the configurations
     Popen("sudo mkdir -p {}/g1/configs/c.1".format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # make the skeleton for a config for this gadget
     Popen("sudo mkdir -p {}/g1/configs/c.1/strings/0x409".format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # This group contains subdirectories for language-specific strings for this configuration
-    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/strings/0x409/configuration'".format(configuration,root), shell=True, stdout=stdolog, stderr=stdolog)                 
-    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/MaxPower'".format(MaxPower,root), shell=True, stdout=stdolog, stderr=stdolog)                  
+    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/strings/0x409/configuration'".format(configuration, root), shell=True, stdout=stdolog, stderr=stdolog)                 
+    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/MaxPower'".format(MaxPower, root), shell=True, stdout=stdolog, stderr=stdolog)                  
+    catbmA = check_output('cat {}/g1/configs/c.1/bmAttributes'.format(root), shell=True, encoding='utf-8').split('\n')[0]       # cat bmAttributes 0x80 default 
+    if catbmA != bmAttributes:
+        Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/bmAttributes'".format(bmAttributes, root), shell=True, stdout=stdolog, stderr=stdolog)                   
+
 
 
 
