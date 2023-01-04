@@ -15,7 +15,8 @@
             {"dev": "unbekannt Ethernet Adapter", "VID": "0x0525","PID": "0xA4AC"}
         ],
         "type": {
-            "func": "ecm.usb0"
+            "func": "ecm.usb0",
+            "attribute": {"ifname": "usb.0", "qmult": "5","HOST":"00:dc:c8:f7:75:14", "SELF": "00:dd:dc:eb:6d:a1"}
         }
 
     },
@@ -27,7 +28,8 @@
             {"dev": "Keyboard", "VID": "0x413C", "PID": "0x2113"}
         ],
         "type": {
-            "func": "hid.usb0"
+            "func": "hid.usb0",
+            "attribute": {"protocol": "1", "subclass": "1", "report_length": "8", "report_desc": "kybd-descriptor.bin"}
         }
     },
     "AOAP": {

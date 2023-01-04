@@ -49,7 +49,7 @@ numdev  = {}
 ##########################
 #       Functions        #
 ##########################
-## menu
+# menu
 # read the device.json file and fill it
 def menu(file):
     '''
@@ -81,6 +81,7 @@ def menu(file):
     def secondlayer(Input0):
         global Input1 
         global Func
+        global Att
         Input1 = Input(str = Cyan + "Enter the device type: " + C_off)
         try:
             if Input1 == 'q':
@@ -93,6 +94,7 @@ def menu(file):
                         print('{}: unsupported'.format(key))
                     if key == "type":
                         Func = device_dict[Input0[Input1]][key]["func"]
+                        Att = device_dict[Input0[Input1]][key]["attribute"]
                 return Input1 
         except:
             secondlayer(Input0)
@@ -132,7 +134,7 @@ def menu(file):
                         # Gadget
                         #######################################################
                         print('>'*60)
-                        # Gadgets(DEV=DEV, VID=VID, PID=PID, FUNC = Func)
+                        Gadgets(DEV = DEV, VID = VID, PID = PID, FUNC = Func, ATT = Att)
                         print('<'*60)
                         #######################################################
                         break
@@ -188,7 +190,7 @@ def reqcheck():
         return reqcheck()
     sys.stdout.write("Checking modules: {} {} \n".format('libcomposite', 'dwc2'))
 
-def Gadgets(DEV, VID, PID, FUNC):
+def Gadgets(DEV, VID, PID, FUNC, ATT):
     '''
     Creating the Gadgets
     
@@ -211,8 +213,9 @@ def Gadgets(DEV, VID, PID, FUNC):
     bmAttributes    = '0x80'                            # Configuration characteristics (D7: Reserved (set to one), D6: Self-powered, D5: Remote Wakeup, D4...0: Reserved (reset to zero)) 
     print('going to emulate {} device'.format(DEV))
     print(FUNC + ' ' + VID + ' ' + PID)
+    print("attribute dict: " + ATT)
 
-
+    # cleaning up
     if os.path.exists("{}/g1/UDC".format(root)):
         catUDC = check_output('cat {}/g1/UDC'.format(root), shell=True, encoding='utf-8').split('\n')[0]                                # cat the content of UDC 
         if 'usb' in catUDC:                                                                                                             # if usb in UDC
@@ -251,6 +254,22 @@ def Gadgets(DEV, VID, PID, FUNC):
     if catbmA != bmAttributes:
         Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/bmAttributes'".format(bmAttributes, root), shell=True, stdout=stdolog, stderr=stdolog)                   
 
+    # creating the functions
+    Popen("sudo mkdir -p {}/g1/functions/{}".format(root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)
+    # ecm it emulates an Eth device but uses USB instead of Eth as the medium. 
+    if "ecm" in FUNC:
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/host_addr'".format(ATT['HOST'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)          # assign HOST MAC address
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/dev_addr'".format(ATT['SELF'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)           # assign device MAC address
+    
+    if "hid" in FUNC:
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/protocol'".format(ATT['protocol'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign protocol for keyboard
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/subclass'".format(ATT['subclass'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign subclass for keyboard
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/subclass'".format(ATT['report_length'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_length for keyboard
+        try:
+            DESCRIPTOR = os.path.join(os.getcwd(), ATT['report_desc'])
+            Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/report_desc'".format(DESCRIPTOR, root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_desc for keyboard
+        except:
+            Popen("sudo bash -c 'echo '05010906a101050719e029e71500250175019508810275089501810175019503050819012903910275019505910175089506150026ff00050719002aff008100c0' | xxd -r -ps > {}/g1/functions/{}/report_desc'".format(root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_desc for keyboard
 
 
 
