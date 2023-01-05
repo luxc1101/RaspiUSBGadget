@@ -213,7 +213,7 @@ def Gadgets(DEV, VID, PID, FUNC, ATT):
     bmAttributes    = '0x80'                            # Configuration characteristics (D7: Reserved (set to one), D6: Self-powered, D5: Remote Wakeup, D4...0: Reserved (reset to zero)) 
     print('going to emulate {} device'.format(DEV))
     print(FUNC + ' ' + VID + ' ' + PID)
-    print("attribute dict: " + ATT)
+    print(ATT)
 
     # cleaning up
     if os.path.exists("{}/g1/UDC".format(root)):
@@ -224,7 +224,7 @@ def Gadgets(DEV, VID, PID, FUNC, ATT):
     if os.path.exists("{}/g1/configs/c.1".format(root)):
         funcname = check_output('ls {}/g1/configs/c.1 | grep usb0 || echo pass'.format(root), shell=True, encoding='utf-8').split('\n')[0] # get the symlink name
         if "usb0" in funcname:
-            Popen('sudo rm {}/g1/configs/c.1/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)           # remove the sysmlink
+            Popen('sudo rm {}/g1/configs/c.1/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)           # remove the symbolic link
             Popen('sudo rmdir {}/g1/configs/c.1/strings/0x409'.format(root), shell=True, stdout=stdolog, stderr=stdolog)       # remove the string dir in the configuations
             Popen('sudo rmdir {}/g1/configs/c.1'.format(root), shell=True, stdout=stdolog, stderr=stdolog)                     # remove the configurations
             Popen('sudo rmdir {}/g1/functions/{}'.format(root, funcname), shell=True, stdout=stdolog, stderr=stdolog)          # remove the functions
@@ -250,9 +250,9 @@ def Gadgets(DEV, VID, PID, FUNC, ATT):
     Popen("sudo mkdir -p {}/g1/configs/c.1/strings/0x409".format(root), shell=True, stdout=stdolog, stderr=stdolog)                   # This group contains subdirectories for language-specific strings for this configuration
     Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/strings/0x409/configuration'".format(configuration, root), shell=True, stdout=stdolog, stderr=stdolog)                 
     Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/MaxPower'".format(MaxPower, root), shell=True, stdout=stdolog, stderr=stdolog)                  
-    catbmA = check_output('cat {}/g1/configs/c.1/bmAttributes'.format(root), shell=True, encoding='utf-8').split('\n')[0]       # cat bmAttributes 0x80 default 
-    if catbmA != bmAttributes:
-        Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/bmAttributes'".format(bmAttributes, root), shell=True, stdout=stdolog, stderr=stdolog)                   
+    #catbmA = check_output('cat {}/g1/configs/c.1/bmAttributes'.format(root), shell=True, encoding='utf-8').split('\n')[0]       # cat bmAttributes 0x80 default 
+    #if catbmA != bmAttributes:
+    Popen("sudo bash -c 'echo {} > {}/g1/configs/c.1/bmAttributes'".format(bmAttributes, root), shell=True, stdout=stdolog, stderr=stdolog)                   
 
     # creating the functions
     Popen("sudo mkdir -p {}/g1/functions/{}".format(root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)
@@ -264,42 +264,25 @@ def Gadgets(DEV, VID, PID, FUNC, ATT):
     if "hid" in FUNC:
         Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/protocol'".format(ATT['protocol'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign protocol for keyboard
         Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/subclass'".format(ATT['subclass'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign subclass for keyboard
-        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/subclass'".format(ATT['report_length'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_length for keyboard
+        Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/report_length'".format(ATT['report_length'], root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_length for keyboard
         try:
             DESCRIPTOR = os.path.join(os.getcwd(), ATT['report_desc'])
-            Popen("sudo bash -c 'echo {} > {}/g1/functions/{}/report_desc'".format(DESCRIPTOR, root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_desc for keyboard
+            
+            Popen("sudo bash -c 'cat {} > {}/g1/functions/{}/report_desc'".format(DESCRIPTOR, root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_desc for keyboard
         except:
             Popen("sudo bash -c 'echo '05010906a101050719e029e71500250175019508810275089501810175019503050819012903910275019505910175089506150026ff00050719002aff008100c0' | xxd -r -ps > {}/g1/functions/{}/report_desc'".format(root, FUNC), shell=True, stdout=stdolog, stderr=stdolog)       # assign report_desc for keyboard
-
-
-
-    # try:
-
-    #     pass
-    # except:
-        # pass
-
-
-
-    # Popen('cd /sys/kernel/config/usb_gadget/ && sudo mkdir -p g1 && cd g1', shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo {} > {}/idVendor'".format(VID, root), shell=True, stdout=stdolog, stderr=stdolog)    
-    # Popen("sudo bash -c 'echo {} > {}/idProduct'".format(PID, root), shell=True, stdout=stdolog, stderr=stdolog)    
-    # Popen("sudo bash -c 'echo '0xEF' > {}/bDeviceClass'".format(root), shell=True, stdout=stdolog, stderr=stdolog)    
-    # Popen("sudo bash -c 'echo '0x02' > {}/bDeviceSubClass'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo '0x01' > {}/bDeviceProtocol'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo mkdir -p {}/strings/0x409".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo fedcba9876543210 > {}/strings/0x409/serialnumber'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo SWTE Media > {}/strings/0x409/manufacturer'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-    # Popen("sudo bash -c 'echo SWTE USB Device > {}/strings/0x409/product'".format(root), shell=True, stdout=stdolog, stderr=stdolog)
-
-
-
-  
-
+    # associating the functions with configurations
+    Popen("sudo ln -s {}/g1/functions/{} {}/g1/configs/c.1".format(root, FUNC, root), shell=True, stdout=stdolog, stderr=stdolog)       # creating symbolic link
     
+    # enabling the Gadget
+    udcname = check_output('ls /sys/class/udc', shell=True, encoding='utf-8').split('\n')[0]                    # get udcname
+    Popen("sudo bash -c 'echo {} > {}/g1/UDC'".format(udcname, root), shell=True, stdout=stdolog, stderr=stdolog)       # gadget is bound to a UDC
+                           
+
     
 if __name__ == "__main__":
     # reqcheck()
     menu(file='device.json')
     stdolog.close()
     
+# cat /home/pi/RaspiUSBGadget/kybd-descriptor.bin > functions/hid.usb0/report_desc
